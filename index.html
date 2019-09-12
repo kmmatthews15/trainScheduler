@@ -14,42 +14,68 @@
 </head> 
 <body>
 <div class="container">
-        <div class="card text-white bg-dark mb-3" id="titleCard">
-            <div class="card-body">
-                <h1>Anytime Is Train Time</h1> 
-                <h4>Choo Choo. Choo Choo.</h4>
-            </div>
+    <div class="jumbotron">
+        <h1 class="text-center" id="heading">Train Scheduler</h1>
+        <h2 class="text-center" id="subHeading">Choo Choo</h2>
+    </div>
+    
+    <div class="row"> 
+        <div class="col-md-12 col-sm-9">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+            <h3 class="panel-title">Current Train Schedule</h3>
         </div>
-    <div class="container"> 
-        <div class="card col-md-12">
-            <div class="card-header">
-                Current Train Schedule
-            </div>
             
-
+    <div class="panel-body"> 
+        <table class="table table-hover" id="train-table">
+            <thead>
+                <tr>
+               <th>Train Name</th>
+               <th>Destination</th>
+               <th class="text-center">Frequency</th>
+               <th class="text-center">Next Arrival</th>
+               <th class="text-center">Minutes Away</th>
+               </tr>
+            </thead>
+            <tbody id="train-table-rows"></tbody>
+        </table>
         </div>
-    </div>
-    <div class="container"> 
-        <div class="card-header">
-            Add Train
-        </div>  
-        <form>
-        <div class="form-group">
-            <label for="exampleFormControlInput1">Train Name</label>
-            <input type="name" class="form-control" id="exampleFormControlInput1">
-            <label for="exampleFormControlInput1">Destination</label>
-            <input type="name" class="form-control" id="exampleFormControlInput1">
-            <label for="exampleFormControlInput1">First Train Time (HH:mm - military time)</label>
-            <input type="name" class="form-control" id="exampleFormControlInput1">
-            <label for="exampleFormControlInput1">Frequency (min)</label>
-            <input type="name" class="form-control" id="exampleFormControlInput1">
-        </div>        
-            <button type="submit" class="btn
-        btn-primary" id="submit">Submit</button>  
-        </form>
         </div>
-    </div>
-</div> 
+    </div>  
+        
+    <div class="col-md-12 col-sm-9">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Add New Train</h3>
+                <div>
+                  <div class="panel-body">
+                    <form>
+                      <div class="form-group">
+                        <label>Train Name</label>
+                        <input type="text" class="form-control form-field" id="train-name">
+                      </div>
+                      <div class="form-group">
+                        <label>Destination</label>
+                        <input type="text" class="form-control form-field" id="destination">
+                      </div>
+                      <div class="form-group">
+                        <label>First Train Time: HH:mm - military time</label>
+                        <input type="text" class="form-control form-field" id="first-train">
+                      </div>
+                      <div class="form-group">
+                        <label>Frequency (min)</label>
+                        <input type="text" class="form-control form-field" id="frequency">
+                      </div>
+    
+                      <button type="submit" class="btn btn-default" id="submit">Submit</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     
 </body>
 </html> 
