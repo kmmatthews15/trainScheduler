@@ -1,104 +1,75 @@
-var firebaseConfig = {
-    apiKey: "AIzaSyAZlepA7Lh-A-YaEIl0N7QFXdJpbi-Upy8",
-    authDomain: "trainscheduler-35a46.firebaseapp.com",
-    databaseURL: "https://trainscheduler-35a46.firebaseio.com",
-    projectId: "trainscheduler-35a46",
-    storageBucket: "",
-    messagingSenderId: "917270711474",
-    appId: "1:917270711474:web:a66c26086111d250338dab"
-};
+$(document).ready(function(){
+    const firebaseConfig = {
+        apiKey: "AIzaSyAZlepA7Lh-A-YaEIl0N7QFXdJpbi-Upy8",
+        authDomain: "trainscheduler-35a46.firebaseapp.com",
+        databaseURL: "https://trainscheduler-35a46.firebaseio.com",
+        projectId: "trainscheduler-35a46",
+        storageBucket: "trainscheduler-35a46.appspot.com",
+        messagingSenderId: "917270711474",
+        appId: "1:917270711474:web:a66c26086111d250338dab"
+      };
 
-// Initialize Firebase
-firebase.initializeApp(config);
 
-var database = firebase.database();
+firebase.initializeApp(firebaseConfig);
+ 
+// A variable to reference the database.
+ var database = firebase.database();
 
-var trainName = "";
-var destination = "";
-var startTime = "";
-var frequency = 0;
+ // Variables for the onClick event
+ var name;
+ var destination;
+ var firstTrain;
+ var frequency = 0;
 
-function currentTime() {
-    var current = moment().format('LT');
-    $("#currentTime").html(current);
-    setTimeout(currentTime, 1000);
-};
+ $("#add-train").on("click", function() {
+     event.preventDefault();
+     // Storing and retreiving new train data
+     name = $("#train-name").val().trim();
+     destination = $("#destination").val().trim();
+     firstTrain = $("#first-train").val().trim();
+     frequency = $("#frequency").val().trim();
 
-$(".form-field").on("keyup", function() {
-    var traintemp = $("#train-name").val().trim();
-    var citytemp = $("#destination").val().trim();
-    var timetemp = $("#first-train").val().trim();
-    var freqtemp = $("#frequency").val().trim();
+     // Pushing to database
+     database.ref().push({
+         name: name,
+         destination: destination,
+         firstTrain: firstTrain,
+         frequency: frequency,
+         dateAdded: firebase.database.ServerValue.TIMESTAMP
+     });
+     $("form")[0].reset();
+ });
 
-    sessionStorage.setItem("train", traintemp);
-    sessionStorage.setItem("city", citytemp);
-    sessionStorage.setItem("time", timetemp);
-    sessionStorage.setItem("freq", freqtemp);
+ database.ref().on("child_added", function(childSnapshot) {
+     var nextArr;
+     var minAway;
+     // Chang year so first train comes before now
+     var firstTrainNew = moment(childSnapshot.val().firstTrain, "hh:mm").subtract(1, "years");
+     // Difference between the current and firstTrain
+     var diffTime = moment().diff(moment(firstTrainNew), "minutes");
+     var remainder = diffTime % childSnapshot.val().frequency;
+     // Minutes until next train
+     var minAway = childSnapshot.val().frequency - remainder;
+     // Next train time
+     var nextTrain = moment().add(minAway, "minutes");
+     nextTrain = moment(nextTrain).format("hh:mm");
+
+     $("#add-row").append("<tr><td>" + childSnapshot.val().name +
+             "</td><td>" + childSnapshot.val().destination +
+             "</td><td>" + childSnapshot.val().frequency +
+             "</td><td>" + nextTrain + 
+             "</td><td>" + minAway + "</td></tr>");
+
+         // Handle the errors
+     }, function(errorObject) {
+         console.log("Errors handled: " + errorObject.code);
+ });
+
+ database.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot) {
+     // Change the HTML to reflect
+     $("#name-display").html(snapshot.val().name);
+     $("#email-display").html(snapshot.val().email);
+     $("#age-display").html(snapshot.val().age);
+     $("#comment-display").html(snapshot.val().comment);
+ });
 });
-
-$("#submit").on("click", function(event) {
-    event.preventDefault();
-  
-    if ($("#train-name").val().trim() === "" ||
-      $("#destination").val().trim() === "" ||
-      $("#first-train").val().trim() === "" ||
-      $("#frequency").val().trim() === "") {
-  
-  
-    } else {
-  
-      trainName = $("#train-name").val().trim();
-      destination = $("#destination").val().trim();
-      startTime = $("#first-train").val().trim();
-      frequency = $("#frequency").val().trim();
-  
-      $(".form-field").val("");
-  
-      database.ref().push({
-        trainName: trainName,
-        destination: destination,
-        frequency: frequency,
-        startTime: startTime,
-        dateAdded: firebase.database.ServerValue.TIMESTAMP
-      });
-  
-      sessionStorage.clear();
-    }
-  
-  });
-  
-  database.ref().on("child_added", function(childSnapshot) {
-    var startTimeConverted = moment(childSnapshot.val().startTime, "hh:mm").subtract(1, "years");
-    var timeDiff = moment().diff(moment(startTimeConverted), "minutes");
-    var timeRemain = timeDiff % childSnapshot.val().frequency;
-    var minToArrival = childSnapshot.val().frequency - timeRemain;
-    var nextTrain = moment().add(minToArrival, "minutes");
-    var key = childSnapshot.key;
-  
-    var newrow = $("<tr>");
-    newrow.append($("<td>" + childSnapshot.val().trainName + "</td>"));
-    newrow.append($("<td>" + childSnapshot.val().destination + "</td>"));
-    newrow.append($("<td class='text-center'>" + childSnapshot.val().frequency + "</td>"));
-    newrow.append($("<td class='text-center'>" + moment(nextTrain).format("LT") + "</td>"));
-    newrow.append($("<td class='text-center'>" + minToArrival + "</td>"));
-    newrow.append($("<td class='text-center'><button class='arrival btn btn-danger btn-xs' data-key='" + key + "'>X</button></td>"));
-  
-    if (minToArrival < 6) {
-      newrow.addClass("info");
-    }
-  
-    $("#train-table-rows").append(newrow);
-  
-  });
-  
-  $(document).on("click", ".arrival", function() {
-    keyref = $(this).attr("data-key");
-    database.ref().child(keyref).remove();
-    window.location.reload();
-  });
-  
-  currentTime();
-  
-  setInterval(function() {
-    window.location.reload();
-  }, 60000);
